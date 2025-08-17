@@ -1,0 +1,10 @@
+---
+description: How to work with Supabase
+globs:
+alwaysApply: false
+---
+
+Supabase can only be written to using the CLI. To write to the database, ensure the following rules are met:
+
+ - Always create new migrations using the CLI, never create your own files
+ - In case of history misalignment, always abort execution and inform the user.
