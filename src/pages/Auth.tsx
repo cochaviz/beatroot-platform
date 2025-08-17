@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -117,6 +117,15 @@ const Auth = () => {
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 Sign In
               </Button>
+              
+              <div className="text-center">
+                <Link 
+                  to="/password-recovery" 
+                  className="text-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
             </form>
 
             <div className="relative">
