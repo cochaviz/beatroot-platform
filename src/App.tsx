@@ -44,6 +44,23 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return user ? <Navigate to="/dashboard" replace /> : <>{children}</>;
 };
 
+// Password Recovery Route component (allows access even when authenticated for recovery flow)
+const PasswordRecoveryRoute = ({ children }: { children: React.ReactNode }) => {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Always allow access to password recovery page regardless of auth state
+  // The PasswordRecovery component will handle the logic internally
+  return <>{children}</>;
+};
+
 
 
 const App = () => (
@@ -56,7 +73,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-            <Route path="/password-recovery" element={<PublicRoute><PasswordRecovery /></PublicRoute>} />
+            <Route path="/password-recovery" element={<PasswordRecoveryRoute><PasswordRecovery /></PasswordRecoveryRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/modules" element={<ProtectedRoute><ModulesList /></ProtectedRoute>} />
             <Route path="/modules/:moduleId" element={<ProtectedRoute><ModuleDetail /></ProtectedRoute>} />
