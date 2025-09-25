@@ -161,13 +161,17 @@ const StudentProgress: React.FC = () => {
             return;
         }
 
-        if (profile?.role !== 'instructor') {
+        if (!profile) {
+            return;
+        }
+
+        if (profile.role !== 'instructor') {
             navigate('/dashboard');
             return;
         }
 
         fetchStudentProgress();
-    }, [fetchStudentProgress, loading, navigate, profile?.role, user]);
+    }, [fetchStudentProgress, loading, navigate, profile, user]);
 
     const filteredStudents = useMemo(() => {
         if (!searchTerm) {
