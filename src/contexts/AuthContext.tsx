@@ -186,6 +186,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signInWithDiscord = async () => {
+    const { data: existingSession } = await supabase.auth.getSession();
+
+    if (existingSession.session?.user) {
+      setSession(existingSession.session);
+      setUser(existingSession.session.user);
+      await fetchProfile(existingSession.session.user.id);
+      return { error: null };
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'discord',
       options: {
