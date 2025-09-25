@@ -12,7 +12,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ currentPage, onSettingsClick }) => {
     const { profile } = useAuth();
 
-    const baseLinkClasses = "relative pb-1 transition-colors before:content-[''] before:absolute before:bottom-0 before:left-0 before:w-0 before:h-0.5 before:bg-cyan-400 before:transition-all before:duration-300 hover:before:w-full";
+    const baseLinkClasses = "relative transition-colors before:content-[''] before:absolute before:bottom-0 before:left-0 before:w-0 before:h-0.5 before:bg-cyan-400 before:transition-all before:duration-300 hover:before:w-full";
     const activeClasses = "text-pink-500 hover:text-cyan-400";
     const inactiveClasses = "text-gray-400 hover:text-white hover:text-cyan-400";
 
