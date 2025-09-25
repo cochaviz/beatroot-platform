@@ -11,6 +11,7 @@ import ModulesList from "./pages/ModulesList";
 import ModuleDetail from "./pages/ModuleDetail";
 import NotFound from "./pages/NotFound";
 import PasswordRecovery from "./pages/PasswordRecovery";
+import StudentProgress from "./pages/StudentProgress";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
             <Route path="/password-recovery" element={<PasswordRecoveryRoute><PasswordRecovery /></PasswordRecoveryRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/students" element={<ProtectedRoute><StudentProgress /></ProtectedRoute>} />
             <Route path="/modules" element={<ProtectedRoute><ModulesList /></ProtectedRoute>} />
             <Route path="/modules/:moduleId" element={<ProtectedRoute><ModuleDetail /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
