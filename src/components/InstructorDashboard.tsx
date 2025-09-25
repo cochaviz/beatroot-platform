@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Clock, CheckCircle, Users, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Clock, CheckCircle, Users, AlertTriangle, TrendingUp, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Module {
@@ -45,6 +47,7 @@ interface StudentWithMissedDeadline {
 }
 
 const InstructorDashboard: React.FC = () => {
+    const navigate = useNavigate();
     const [studentsCount, setStudentsCount] = useState(0);
     const [moduleCompletions, setModuleCompletions] = useState<ModuleCompletion[]>([]);
     const [upcomingDeadlines, setUpcomingDeadlines] = useState<Module[]>([]);
@@ -253,6 +256,23 @@ const InstructorDashboard: React.FC = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-col gap-4 pb-6 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <h2 className="text-2xl font-bold text-foreground">Instructor Overview</h2>
+                    <p className="text-sm text-muted-foreground">
+                        Monitor student momentum, module completion, and upcoming deadlines.
+                    </p>
+                </div>
+                <Button
+                    variant="cyber"
+                    onClick={() => navigate('/students')}
+                    className="self-start lg:self-auto"
+                >
+                    <Eye className="h-4 w-4" />
+                    View student progress
+                </Button>
+            </div>
+
             {/* Overview Cards */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
                 {/* Total Students */}
