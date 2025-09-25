@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,21 +35,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
-    const { data: profileData } = await supabase
+  const profileFetchMaxAttempts = 5;
+  const profileFetchDelayMs = 400;
+
+  const fetchProfile = useCallback(async (userId: string, attempt = 0): Promise<void> => {
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('user_id', userId)
+      .maybeSingle();
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('Error fetching profile:', profileError);
+    }
+
+    if (profileData) {
+      setProfile(profileData);
+      return;
+    }
+
+    if (attempt < profileFetchMaxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, profileFetchDelayMs * (attempt + 1)));
+      return fetchProfile(userId, attempt + 1);
+    }
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+
+    if (userError) {
+      console.error('Error retrieving user for profile creation:', userError);
+      setProfile(null);
+      return;
+    }
+
+    const supabaseUser = userData.user;
+
+    if (!supabaseUser) {
+      setProfile(null);
+      return;
+    }
+
+    const fallbackName =
+      supabaseUser.user_metadata?.full_name ??
+      supabaseUser.user_metadata?.name ??
+      supabaseUser.user_metadata?.user_name ??
+      supabaseUser.email ??
+      '';
+
+    const fallbackAvatar =
+      supabaseUser.user_metadata?.avatar_url ??
+      supabaseUser.user_metadata?.picture ??
+      supabaseUser.user_metadata?.avatar ??
+      null;
+
+    const { data: createdProfile, error: upsertError } = await supabase
+      .from('profiles')
+      .upsert({
+        user_id: userId,
+        email: supabaseUser.email,
+        full_name: fallbackName,
+        avatar_url: fallbackAvatar,
+        role: 'student' as UserRole,
+      })
+      .select()
       .single();
 
-    setProfile(profileData);
-  };
+    if (upsertError) {
+      console.error('Error creating profile for user:', upsertError);
+      setProfile(null);
+      return;
+    }
 
-  const refreshProfile = async () => {
+    setProfile(createdProfile);
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
     if (user) {
       await fetchProfile(user.id);
     }
-  };
+  }, [fetchProfile, user]);
 
   useEffect(() => {
     // Set up auth state listener
@@ -60,8 +123,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (session?.user) {
           // Fetch user profile
-          setTimeout(async () => {
-            await fetchProfile(session.user.id);
+          setTimeout(() => {
+            fetchProfile(session.user.id);
           }, 0);
         } else {
           setProfile(null);
@@ -84,8 +147,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          setTimeout(async () => {
-            await fetchProfile(session.user.id);
+          setTimeout(() => {
+            fetchProfile(session.user.id);
           }, 0);
         }
       }
@@ -94,7 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchProfile]);
 
   const signUp = async (email: string, password: string, fullName: string) => {
     const redirectUrl = `${window.location.origin}/`;
